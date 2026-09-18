@@ -12,6 +12,7 @@ import {
   summarizeEvents,
   generateDemoEvents,
 } from "@/lib/github/transform";
+import { mergePinnedRepos } from "@/lib/github/pinned";
 
 export const revalidate = 1800; // 30 min ISR cache
 export const dynamic = "force-static";
@@ -92,6 +93,7 @@ export async function GET() {
   const { current, longest, best } = computeStreaks(contributions);
   const languages = aggregateLanguages(safeRepos);
   const { commits, prs, issues } = summarizeEvents(events);
+  const pinnedRepos = mergePinnedRepos(safeRepos);
 
   // Visitor count: persistent baseline + small increment per fetch
   const visitorBase = 13847;
@@ -100,6 +102,7 @@ export async function GET() {
   const data: DashboardData = {
     user: safeUser,
     repos: safeRepos,
+    pinnedRepos,
     events: events!,
     contributions,
     languages,

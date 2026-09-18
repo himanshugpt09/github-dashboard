@@ -6,22 +6,30 @@ import { Github, Twitter, Linkedin, Mail, ArrowDown, Sparkles, Code2 } from "luc
 import { useEffects } from "./effects-provider";
 
 const ROLES = [
-  "Full-Stack Developer",
-  "Open Source Enthusiast",
-  "Problem Solver",
-  "Always Shipping",
+  "Data Scientist",
+  "ML Engineer",
+  "Python Developer",
+  "Analytics Builder",
   "Lifelong Learner",
 ];
 
+// 12 orbiting techs — Java, JavaScript, Python, HTML, Bash, Ubuntu,
+// SQL, NumPy, Pandas, Matplotlib, Seaborn, Machine Learning.
 const ORBIT_TECHS = [
-  { name: "TS", color: "#3178c6", r: 130, dur: 18, offset: 0 },
-  { name: "JS", color: "#f1e05a", r: 130, dur: 18, offset: 0.33 },
-  { name: "Py", color: "#3572A5", r: 130, dur: 18, offset: 0.66 },
-  { name: "Next", color: "#ffffff", r: 180, dur: 26, offset: 0 },
-  { name: "React", color: "#61dafb", r: 180, dur: 26, offset: 0.5 },
-  { name: "Node", color: "#83cd29", r: 230, dur: 34, offset: 0.2 },
-  { name: "Tail", color: "#38bdf8", r: 230, dur: 34, offset: 0.7 },
+  { name: "Java",    color: "#f89820", r: 130, dur: 22, offset: 0.00 },
+  { name: "JS",      color: "#f1e05a", r: 130, dur: 22, offset: 0.33 },
+  { name: "Python",  color: "#3572A5", r: 130, dur: 22, offset: 0.66 },
+  { name: "HTML",     color: "#e34c26", r: 180, dur: 30, offset: 0.00 },
+  { name: "Bash",    color: "#89e051", r: 180, dur: 30, offset: 0.50 },
+  { name: "Ubuntu",  color: "#E95420", r: 180, dur: 30, offset: 0.75 },
+  { name: "SQL",     color: "#e38c00", r: 230, dur: 38, offset: 0.10 },
+  { name: "NumPy",   color: "#013243", r: 230, dur: 38, offset: 0.40 },
+  { name: "Pandas",  color: "#150458", r: 230, dur: 38, offset: 0.70 },
+  { name: "Mpl",     color: "#3776AB", r: 280, dur: 46, offset: 0.05 }, // Matplotlib
+  { name: "Sns",     color: "#4C72B0", r: 280, dur: 46, offset: 0.55 }, // Seaborn
+  { name: "ML",      color: "#a855f7", r: 280, dur: 46, offset: 0.80 }, // Machine Learning
 ];
+
 
 function useTypewriter(words: string[], typeMs = 90, holdMs = 1600) {
   const [text, setText] = useState("");
@@ -144,36 +152,47 @@ export function Hero({ data }: { data: { user: any } }) {
                 />
 
                 {/* Orbiting tech badges */}
-                {ORBIT_TECHS.map((tech, i) => (
-                  <div
-                    key={i}
-                    className="absolute top-1/2 left-1/2"
-                    style={{
-                      ['--orbit-r' as any]: `${tech.r}px`,
-                      animation: `orbit ${tech.dur}s linear infinite`,
-                      animationDelay: `-${tech.dur * tech.offset}s`,
-                      transformStyle: "preserve-3d",
-                    }}
-                  >
+                {ORBIT_TECHS.map((tech, i) => {
+                  // Smaller badges for outer orbits to avoid crowding with 12 icons
+                  const isOuter = tech.r >= 280;
+                  const size = isOuter ? "h-8 w-8 sm:h-9 sm:w-9" : "h-9 w-9 sm:h-10 sm:w-10";
+                  const offset = isOuter ? -18 : -20;
+                  return (
                     <div
-                      className="h-9 w-9 sm:h-10 sm:w-10 -ml-5 -mt-5 rounded-xl glass-strong flex items-center justify-center text-xs font-bold"
-                      style={{ color: tech.color, borderColor: tech.color + "55" }}
+                      key={i}
+                      className="absolute top-1/2 left-1/2"
+                      style={{
+                        ['--orbit-r' as any]: `${tech.r}px`,
+                        animation: `orbit ${tech.dur}s linear infinite`,
+                        animationDelay: `-${tech.dur * tech.offset}s`,
+                        transformStyle: "preserve-3d",
+                      }}
                     >
-                      {tech.name}
+                      <div
+                        className={`${size} rounded-xl glass-strong flex items-center justify-center text-[10px] sm:text-xs font-bold`}
+                        style={{
+                          color: tech.color,
+                          borderColor: tech.color + "55",
+                          marginLeft: offset,
+                          marginTop: offset,
+                        }}
+                      >
+                        {tech.name}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </>
             )}
 
-            {/* Static tech badges when 3D off */}
+            {/* Static tech badges when 3D off — show all 12 as wrap */}
             {!heavy3D && (
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-2 flex-wrap justify-center">
-                {ORBIT_TECHS.slice(0, 5).map((tech, i) => (
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 flex-wrap justify-center max-w-[420px]">
+                {ORBIT_TECHS.map((tech, i) => (
                   <div
                     key={i}
-                    className="h-9 px-3 rounded-xl glass-strong flex items-center justify-center text-xs font-bold float-anim"
-                    style={{ color: tech.color, borderColor: tech.color + "55", animationDelay: `${i * 0.3}s` }}
+                    className="h-8 px-2.5 rounded-lg glass-strong flex items-center justify-center text-[10px] sm:text-xs font-bold float-anim"
+                    style={{ color: tech.color, borderColor: tech.color + "55", animationDelay: `${i * 0.25}s` }}
                   >
                     {tech.name}
                   </div>

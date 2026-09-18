@@ -11,7 +11,7 @@ import { Hero } from "@/components/dashboard/hero";
 import { StatsStrip } from "@/components/dashboard/stats-strip";
 import { ContributionUniverse } from "@/components/dashboard/contribution-universe";
 import { TechStackGalaxy } from "@/components/dashboard/tech-stack-galaxy";
-import { FeaturedProjects } from "@/components/dashboard/featured-projects";
+import { PinnedRepos } from "@/components/dashboard/pinned-repos";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { AchievementsWall } from "@/components/dashboard/achievements-wall";
 import { VisitorMap } from "@/components/dashboard/visitor-map";
@@ -85,7 +85,7 @@ export default function Home() {
             <StatsStrip data={data} />
             <ContributionUniverse data={data} />
             <TechStackGalaxy data={data} />
-            <FeaturedProjects data={data} />
+            <PinnedRepos data={data} />
             <ActivityTimeline data={data} />
             <AchievementsWall data={data} />
             <VisitorMap data={data} />

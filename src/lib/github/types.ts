@@ -59,9 +59,35 @@ export type ContributionDay = {
   level: 0 | 1 | 2 | 3 | 4;
 };
 
+export type PinnedRepo = {
+  id: number;
+  name: string;
+  full_name: string;
+  html_url: string;
+  description: string;
+  fork: boolean;
+  language: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  watchers_count: number;
+  open_issues_count: number;
+  topics: string[];
+  created_at: string;
+  updated_at: string;
+  pushed_at: string;
+  size: number;
+  default_branch: string;
+  homepage: string | null;
+  // Curated extras
+  tags: string[];
+  accent: string;
+  short: string;
+};
+
 export type DashboardData = {
   user: GitHubUser;
   repos: GitHubRepo[];
+  pinnedRepos: PinnedRepo[];
   events: GitHubEvent[];
   contributions: ContributionDay[];
   languages: { name: string; bytes: number; color: string; pct: number }[];

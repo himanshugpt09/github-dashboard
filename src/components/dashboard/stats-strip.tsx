@@ -1,16 +1,17 @@
 'use client'
 
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FolderGit2, Star, GitFork, Users, Flame, GitCommit } from "lucide-react";
 
-function useCountUp(target: number, run: boolean, duration = 1.8) {
+function useCountUp(target: number, run: boolean, duration = 1.6) {
   const mv = useMotionValue(0);
   const rounded = useTransform(mv, (v) => Math.round(v).toLocaleString());
   const [display, setDisplay] = useState("0");
   useEffect(() => {
     if (!run) return;
-    const controls = animate(mv, target, { duration, ease: [0.16, 1, 0.3, 1] });
+    // ease-out-quart so the count visibly slows toward the end
+    const controls = animate(mv, target, { duration, ease: [0.22, 1, 0.36, 1] });
     const unsub = rounded.on("change", (v) => setDisplay(v));
     return () => { controls.stop(); unsub(); };
   }, [run, target, mv, rounded, duration]);
@@ -18,28 +19,31 @@ function useCountUp(target: number, run: boolean, duration = 1.8) {
 }
 
 function Sparkline({ data, color }: { data: number[]; color: string }) {
-  const w = 80;
-  const h = 28;
+  const w = 88;
+  const h = 32;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
   const range = max - min || 1;
   const points = data
     .map((v, i) => {
       const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / range) * h;
+      const y = h - ((v - min) / range) * (h - 4) - 2;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
+  const lastY = h - ((data[data.length - 1] - min) / range) * (h - 4) - 2;
+  const gid = `spark-${color.replace(/[^a-z0-9]/gi, "")}`;
   return (
-    <svg width={w} height={h} className="opacity-70 group-hover:opacity-100 transition-opacity">
+    <svg width={w} height={h} className="opacity-80 group-hover:opacity-100 transition-opacity">
       <defs>
-        <linearGradient id={`spark-${color.replace("#", "")}`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.4" />
+        <linearGradient id={gid} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.5" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polyline points={`0,${h} ${points} ${w},${h}`} fill={`url(#spark-${color.replace("#", "")})`} stroke="none" />
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={`0,${h} ${points} ${w},${h}`} fill={`url(#${gid})`} stroke="none" />
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={w} cy={lastY} r="2.5" fill={color} />
     </svg>
   );
 }
@@ -51,6 +55,7 @@ function StatCard({
   color,
   delay,
   data,
+  suffix,
 }: {
   icon: typeof FolderGit2;
   label: string;
@@ -58,6 +63,7 @@ function StatCard({
   color: string;
   delay: number;
   data: number[];
+  suffix?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -83,6 +89,7 @@ function StatCard({
           </div>
           <div className="mt-2 text-3xl sm:text-4xl font-black tabular-nums">
             {display}
+            {suffix && <span className="text-lg ml-0.5 opacity-70">{suffix}</span>}
           </div>
         </div>
         <Sparkline data={data} color={color} />
@@ -92,20 +99,32 @@ function StatCard({
 }
 
 export function StatsStrip({ data }: { data: any }) {
-  // Generate per-day sparkline data (last 30 days)
+  // Use the last 30 days of real contribution data for the commit sparkline
+  const realSpark = useMemo(() => {
+    const last30 = (data.contributions ?? []).slice(-30).map((d: any) => d.count);
+    return last30.length === 30 ? last30 : null;
+  }, [data.contributions]);
+
   const gen = (max: number) =>
     Array.from({ length: 30 }).map((_, i) => {
       const noise = Math.sin(i * 1.3 + max) * 0.4 + 0.5;
       return Math.max(0, Math.floor(noise * max));
     });
 
+  // Real commit total this year, derived from the contribution graph
+  const yearCommitTotal = useMemo(() => {
+    return (data.contributions ?? []).reduce((a: number, d: any) => a + (d.count || 0), 0);
+  }, [data.contributions]);
+
+  const commitSpark = realSpark ?? gen(8);
+
   const stats = [
-    { icon: FolderGit2, label: "Public Repos", value: data.user.public_repos, color: "#a855f7", delay: 0, data: gen(8) },
-    { icon: Star, label: "Stars Earned", value: data.totalStars, color: "#facc15", delay: 0.08, data: gen(12) },
-    { icon: GitFork, label: "Total Forks", value: data.totalForks, color: "#22d3ee", delay: 0.16, data: gen(6) },
-    { icon: Users, label: "Followers", value: data.user.followers, color: "#f472b6", delay: 0.24, data: gen(5) },
-    { icon: GitCommit, label: "Total Commits", value: data.totalCommits, color: "#4ade80", delay: 0.32, data: gen(40) },
-    { icon: Flame, label: "Longest Streak", value: data.longestStreak, color: "#fb923c", delay: 0.4, data: gen(20) },
+    { icon: FolderGit2, label: "Public Repos",  value: data.user.public_repos, color: "#a855f7", delay: 0,    data: gen(6) },
+    { icon: Star,       label: "Stars Earned",   value: data.totalStars,        color: "#facc15", delay: 0.08, data: gen(4) },
+    { icon: GitFork,    label: "Total Forks",    value: data.totalForks,        color: "#22d3ee", delay: 0.16, data: gen(3) },
+    { icon: Users,      label: "Followers",      value: data.user.followers,    color: "#f472b6", delay: 0.24, data: gen(3) },
+    { icon: GitCommit,  label: "Commits · yr",   value: yearCommitTotal,        color: "#4ade80", delay: 0.32, data: commitSpark },
+    { icon: Flame,      label: "Best Streak",    value: data.longestStreak,      color: "#fb923c", delay: 0.4,  data: gen(10), suffix: "d" },
   ];
 
   return (
@@ -123,7 +142,8 @@ export function StatsStrip({ data }: { data: any }) {
             <span className="text-gradient">Numbers don't lie</span>
           </h2>
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto text-sm sm:text-base">
-            Real-time metrics pulled straight from the GitHub API — no vanity inflation.
+            Real-time metrics pulled straight from the GitHub API. The commit sparkline
+            reflects your actual contribution graph from the last 30 days.
           </p>
         </motion.div>
 

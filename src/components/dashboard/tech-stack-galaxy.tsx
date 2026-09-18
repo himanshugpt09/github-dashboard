@@ -15,19 +15,22 @@ type TechItem = {
 };
 
 function buildTech(langs: { name: string; pct: number; color: string }[]): TechItem[] {
+  // The 12 technologies the user actually orbits around —
+  // Java, JavaScript, Python, HTML, Bash, Ubuntu, SQL, NumPy, Pandas,
+  // Matplotlib, Seaborn, Machine Learning.
   const defaults = [
-    { name: "TypeScript", short: "TS", color: "#3178c6", pct: 28, years: 2, lastProject: "GitHub Dashboard" },
-    { name: "JavaScript", short: "JS", color: "#f1e05a", pct: 35, years: 3, lastProject: "Course-Grading-System" },
-    { name: "Python", short: "Py", color: "#3572A5", pct: 18, years: 2, lastProject: "flask-task-api" },
-    { name: "HTML", short: "H5", color: "#e34c26", pct: 12, years: 3, lastProject: "Study-Notes-Hub" },
-    { name: "CSS", short: "CS", color: "#563d7c", pct: 5, years: 3, lastProject: "Shipping-Estimator" },
-    { name: "React", short: "Re", color: "#61dafb", pct: 22, years: 2, lastProject: "Dashboard UI" },
-    { name: "Next.js", short: "Nx", color: "#ffffff", pct: 20, years: 1, lastProject: "Profile Dashboard" },
-    { name: "Node.js", short: "Nd", color: "#83cd29", pct: 15, years: 2, lastProject: "Bank-reconciler" },
-    { name: "Tailwind", short: "Tw", color: "#38bdf8", pct: 18, years: 1, lastProject: "Glass UI" },
-    { name: "Prisma", short: "Pr", color: "#5a67d8", pct: 8, years: 1, lastProject: "DB layer" },
-    { name: "Git", short: "Gt", color: "#f05033", pct: 30, years: 3, lastProject: "every repo" },
-    { name: "Bun", short: "Bn", color: "#fbf0df", pct: 10, years: 1, lastProject: "build pipeline" },
+    { name: "Java",          short: "Java",  color: "#f89820", pct: 22, years: 2, lastProject: "Course-Grading-System" },
+    { name: "JavaScript",    short: "JS",    color: "#f1e05a", pct: 30, years: 3, lastProject: "LLM-Agent-Browser-Based" },
+    { name: "Python",        short: "Py",    color: "#3572A5", pct: 38, years: 3, lastProject: "Data_analyst_agent-2.0" },
+    { name: "HTML",          short: "HTML",  color: "#e34c26", pct: 12, years: 3, lastProject: "Study-Notes-Hub" },
+    { name: "Bash",          short: "Bash",  color: "#89e051", pct: 8,  years: 2, lastProject: "deploy scripts" },
+    { name: "Ubuntu",        short: "Ubu",   color: "#E95420", pct: 10, years: 3, lastProject: "dev environment" },
+    { name: "SQL",           short: "SQL",   color: "#e38c00", pct: 15, years: 2, lastProject: "Stores-Sales-Commission-Calculator" },
+    { name: "NumPy",         short: "NumPy", color: "#013243", pct: 25, years: 2, lastProject: "sensor-parser" },
+    { name: "Pandas",        short: "Pandas",color: "#150458", pct: 28, years: 2, lastProject: "Data_analyst_agent-2.0" },
+    { name: "Matplotlib",    short: "Mpl",   color: "#3776AB", pct: 22, years: 2, lastProject: "RAWGraphs-Visualization" },
+    { name: "Seaborn",       short: "Sns",   color: "#4C72B0", pct: 18, years: 1, lastProject: "RAWGraphs-Visualization" },
+    { name: "Machine Learning", short: "ML",  color: "#a855f7", pct: 20, years: 1, lastProject: "Data_analyst_agent-2.0" },
   ];
 
   const merged: TechItem[] = defaults.map((d, i) => {
@@ -94,17 +97,18 @@ export function TechStackGalaxy({ data }: { data: any }) {
               const x = Math.cos(t.angle) * t.distance;
               const y = Math.sin(t.angle) * t.distance;
               const isActive = hovered === t.name || selected === t.name;
+              const isWide = t.short.length > 3;
               return (
                 <motion.button
                   key={t.name}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={inView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: i * 0.05, duration: 0.4, type: "spring", stiffness: 200 }}
-                  whileHover={{ scale: 1.25, zIndex: 10 }}
+                  transition={{ delay: i * 0.04, duration: 0.4, type: "spring", stiffness: 200 }}
+                  whileHover={{ scale: 1.2, zIndex: 10 }}
                   onClick={() => setSelected(selected === t.name ? null : t.name)}
                   onMouseEnter={() => setHovered(t.name)}
                   onMouseLeave={() => setHovered(null)}
-                  className="absolute top-1/2 left-1/2 h-12 w-12 rounded-xl glass-strong flex items-center justify-center font-bold text-xs"
+                  className={`absolute top-1/2 left-1/2 ${isWide ? "h-11 px-2" : "h-12 w-12"} min-w-[2.75rem] rounded-xl glass-strong flex items-center justify-center font-bold text-xs`}
                   style={{
                     transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
                     color: t.color,
@@ -180,15 +184,17 @@ export function TechStackGalaxy({ data }: { data: any }) {
               </div>
             )}
 
-            {/* Top languages list */}
+            {/* Tech mastery list — show the 12 specified techs by experience */}
             <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--glass-border)" }}>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Top by bytes</div>
-              <div className="space-y-2">
-                {data.languages.slice(0, 5).map((lang: any) => (
-                  <div key={lang.name} className="flex items-center gap-3">
-                    <div className="h-3 w-3 rounded-full" style={{ background: lang.color }} />
-                    <span className="text-sm flex-1">{lang.name}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">{lang.pct.toFixed(1)}%</span>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+                Toolkit · {techs.length} skills
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {techs.slice(0, 8).map((t) => (
+                  <div key={t.name} className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: t.color }} />
+                    <span className="text-xs flex-1 truncate">{t.name}</span>
+                    <span className="text-[10px] text-muted-foreground tabular-nums">{t.years}y</span>
                   </div>
                 ))}
               </div>
