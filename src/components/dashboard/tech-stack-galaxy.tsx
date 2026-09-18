@@ -1,49 +1,53 @@
 'use client'
 
 import { motion, useInView } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { BrainCircuit } from "lucide-react";
+import {
+  SiOpenjdk,
+  SiJavascript,
+  SiPython,
+  SiHtml5,
+  SiGnubash,
+  SiUbuntu,
+  SiPostgresql,
+  SiNumpy,
+  SiPandas,
+} from "@icons-pack/react-simple-icons";
 
 type TechItem = {
   name: string;
-  short: string;
   color: string;
   pct: number;
   years: number;
   lastProject: string;
   angle: number;
   distance: number;
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
 };
 
-function buildTech(langs: { name: string; pct: number; color: string }[]): TechItem[] {
-  // The 12 technologies the user actually orbits around —
-  // Java, JavaScript, Python, HTML, Bash, Ubuntu, SQL, NumPy, Pandas,
-  // Matplotlib, Seaborn, Machine Learning.
+function buildTech(_langs: { name: string; pct: number; color: string }[]): TechItem[] {
+  // 10 technologies — Mpl + Sns removed per request.
+  // Java (OpenJDK), JavaScript, Python, HTML5, Bash, Ubuntu, SQL (PostgreSQL),
+  // NumPy, Pandas, Machine Learning.
   const defaults = [
-    { name: "Java",          short: "Java",  color: "#f89820", pct: 22, years: 2, lastProject: "Course-Grading-System" },
-    { name: "JavaScript",    short: "JS",    color: "#f1e05a", pct: 30, years: 3, lastProject: "LLM-Agent-Browser-Based" },
-    { name: "Python",        short: "Py",    color: "#3572A5", pct: 38, years: 3, lastProject: "Data_analyst_agent-2.0" },
-    { name: "HTML",          short: "HTML",  color: "#e34c26", pct: 12, years: 3, lastProject: "Study-Notes-Hub" },
-    { name: "Bash",          short: "Bash",  color: "#89e051", pct: 8,  years: 2, lastProject: "deploy scripts" },
-    { name: "Ubuntu",        short: "Ubu",   color: "#E95420", pct: 10, years: 3, lastProject: "dev environment" },
-    { name: "SQL",           short: "SQL",   color: "#e38c00", pct: 15, years: 2, lastProject: "Stores-Sales-Commission-Calculator" },
-    { name: "NumPy",         short: "NumPy", color: "#013243", pct: 25, years: 2, lastProject: "sensor-parser" },
-    { name: "Pandas",        short: "Pandas",color: "#150458", pct: 28, years: 2, lastProject: "Data_analyst_agent-2.0" },
-    { name: "Matplotlib",    short: "Mpl",   color: "#3776AB", pct: 22, years: 2, lastProject: "RAWGraphs-Visualization" },
-    { name: "Seaborn",       short: "Sns",   color: "#4C72B0", pct: 18, years: 1, lastProject: "RAWGraphs-Visualization" },
-    { name: "Machine Learning", short: "ML",  color: "#a855f7", pct: 20, years: 1, lastProject: "Data_analyst_agent-2.0" },
+    { name: "Java",              color: "#ED8B00", pct: 22, years: 2, lastProject: "Course-Grading-System",            Icon: SiOpenjdk },
+    { name: "JavaScript",        color: "#F7DF1E", pct: 30, years: 3, lastProject: "LLM-Agent-Browser-Based",        Icon: SiJavascript },
+    { name: "Python",            color: "#3776AB", pct: 38, years: 3, lastProject: "Data_analyst_agent-2.0",          Icon: SiPython },
+    { name: "HTML5",             color: "#E34F26", pct: 12, years: 3, lastProject: "Study-Notes-Hub",                 Icon: SiHtml5 },
+    { name: "Bash",              color: "#4EAA25", pct: 8,  years: 2, lastProject: "deploy scripts",                  Icon: SiGnubash },
+    { name: "Ubuntu",            color: "#E95420", pct: 10, years: 3, lastProject: "dev environment",                Icon: SiUbuntu },
+    { name: "SQL",               color: "#4169E1", pct: 15, years: 2, lastProject: "Stores-Sales-Commission-Calculator", Icon: SiPostgresql },
+    { name: "NumPy",             color: "#013243", pct: 25, years: 2, lastProject: "sensor-parser",                   Icon: SiNumpy },
+    { name: "Pandas",            color: "#150458", pct: 28, years: 2, lastProject: "Data_analyst_agent-2.0",          Icon: SiPandas },
+    { name: "Machine Learning", color: "#a855f7", pct: 20, years: 1, lastProject: "Data_analyst_agent-2.0",          Icon: BrainCircuit },
   ];
 
-  const merged: TechItem[] = defaults.map((d, i) => {
-    const langMatch = langs.find((l) => l.name === d.name);
-    const pct = langMatch ? Math.round(langMatch.pct) : d.pct;
-    return {
-      ...d,
-      pct,
-      angle: (i / defaults.length) * Math.PI * 2,
-      distance: 200 + (i % 3) * 30,
-    };
-  });
-  return merged;
+  return defaults.map((d, i) => ({
+    ...d,
+    angle: (i / defaults.length) * Math.PI * 2,
+    distance: 200 + (i % 3) * 30,
+  }));
 }
 
 export function TechStackGalaxy({ data }: { data: any }) {
@@ -68,7 +72,7 @@ export function TechStackGalaxy({ data }: { data: any }) {
             <span className="text-gradient">Tools of the trade</span>
           </h2>
           <p className="mt-3 text-muted-foreground max-w-xl mx-auto text-sm sm:text-base">
-            Hover an icon to see years of use and last project. Click to filter featured projects below.
+            Hover any icon to see years of use and last project.
           </p>
         </motion.div>
 
@@ -97,27 +101,33 @@ export function TechStackGalaxy({ data }: { data: any }) {
               const x = Math.cos(t.angle) * t.distance;
               const y = Math.sin(t.angle) * t.distance;
               const isActive = hovered === t.name || selected === t.name;
-              const isWide = t.short.length > 3;
               return (
                 <motion.button
                   key={t.name}
                   initial={{ opacity: 0, scale: 0 }}
                   animate={inView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: i * 0.04, duration: 0.4, type: "spring", stiffness: 200 }}
+                  transition={{ delay: i * 0.05, duration: 0.4, type: "spring", stiffness: 200 }}
                   whileHover={{ scale: 1.2, zIndex: 10 }}
                   onClick={() => setSelected(selected === t.name ? null : t.name)}
                   onMouseEnter={() => setHovered(t.name)}
                   onMouseLeave={() => setHovered(null)}
-                  className={`absolute top-1/2 left-1/2 ${isWide ? "h-11 px-2" : "h-12 w-12"} min-w-[2.75rem] rounded-xl glass-strong flex items-center justify-center font-bold text-xs`}
+                  className="absolute top-1/2 left-1/2 h-12 w-12 rounded-xl glass-strong flex items-center justify-center group/galaxy"
                   style={{
                     transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
                     color: t.color,
                     borderColor: isActive ? t.color : undefined,
-                    boxShadow: isActive ? `0 0 20px ${t.color}` : undefined,
+                    boxShadow: isActive ? `0 0 20px ${t.color}` : `0 0 10px ${t.color}33`,
                   }}
                   aria-label={`${t.name}: ${t.pct}% of codebase, ${t.years} years`}
                 >
-                  {t.short}
+                  <t.Icon size={22} color={t.color} />
+                  {/* Tooltip on hover */}
+                  <span
+                    className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium px-1.5 py-0.5 rounded glass-strong opacity-0 group-hover/galaxy:opacity-100 transition-opacity pointer-events-none"
+                    style={{ color: t.color }}
+                  >
+                    {t.name}
+                  </span>
                 </motion.button>
               );
             })}
@@ -139,10 +149,10 @@ export function TechStackGalaxy({ data }: { data: any }) {
                     <div>
                       <div className="flex items-center gap-3 mb-4">
                         <div
-                          className="h-14 w-14 rounded-2xl glass-strong flex items-center justify-center font-bold"
-                          style={{ color: t.color, borderColor: t.color }}
+                          className="h-14 w-14 rounded-2xl glass-strong flex items-center justify-center"
+                          style={{ color: t.color, borderColor: t.color + "55" }}
                         >
-                          {t.short}
+                          <t.Icon size={28} color={t.color} />
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold">{t.name}</h3>
@@ -179,20 +189,20 @@ export function TechStackGalaxy({ data }: { data: any }) {
                 <div className="text-6xl mb-3">🛰️</div>
                 <h3 className="text-xl font-bold">Hover any icon</h3>
                 <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-                  Each orbit represents a technology in my toolkit. Hover to inspect, click to filter projects below.
+                  Each orbit represents a technology in my toolkit. Hover to inspect years of use and last project.
                 </p>
               </div>
             )}
 
-            {/* Tech mastery list — show the 12 specified techs by experience */}
+            {/* Tech mastery list — show the 10 specified techs by experience */}
             <div className="mt-6 pt-6 border-t" style={{ borderColor: "var(--glass-border)" }}>
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
                 Toolkit · {techs.length} skills
               </div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                {techs.slice(0, 8).map((t) => (
+                {techs.map((t) => (
                   <div key={t.name} className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: t.color }} />
+                    <t.Icon size={14} color={t.color} />
                     <span className="text-xs flex-1 truncate">{t.name}</span>
                     <span className="text-[10px] text-muted-foreground tabular-nums">{t.years}y</span>
                   </div>
